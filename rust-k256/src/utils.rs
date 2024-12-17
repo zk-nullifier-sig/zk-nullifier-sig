@@ -9,13 +9,13 @@ use k256::{
 
 // Hashes two values to the curve
 pub(crate) fn hash_to_curve(
-    m: &[u8],
+    m: &PlumeMessage,
     pk: &ProjectivePoint,
 ) -> Result<ProjectivePoint, k256::elliptic_curve::Error> {
     Secp256k1::hash_from_bytes::<ExpandMsgXmd<Sha256>>(
-        &[[m, &encode_pt(pk)].concat().as_slice()],
+        &[[m.msg.as_slice(), &encode_pt(pk)].concat().as_slice()],
         //b"CURVE_XMD:SHA-256_SSWU_RO_",
-        &[DST],
+        &[&m.dst],
     )
 }
 

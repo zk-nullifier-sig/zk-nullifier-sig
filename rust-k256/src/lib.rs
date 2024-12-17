@@ -57,8 +57,31 @@ use utils::*;
 pub mod randomizedsigner;
 use randomizedsigner::PlumeSigner;
 
-/// The domain separation tag used for hashing to the `secp256k1` curve
-pub const DST: &[u8] = b"QUUX-V01-CS02-with-secp256k1_XMD:SHA-256_SSWU_RO_"; // Hash to curve algorithm
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct PlumeMessage/* Dst */ {
+    // /* dst_ */protocol: &'signing [u8],
+    // /* dst_ */msg_id: &'signing [u8],
+    /// WARNING: MUST contain the protocol id, and *unique* message id for this protocol. Consider safe separation of these ids (it 
+    /// could be length of the protocol id, or anything you choose).
+    /// 
+    /// WARNING: keep length of this field *less than 255* to enjoy better compatibility and smaller constraints number in 
+    /// proving circuits.
+    pub dst: Vec<u8>,
+    pub msg: Vec<u8>
+}
+impl PlumeMessage {
+    /// Yields the signature with `None` for `v1specific`. Same as using [`RandomizedSigner`] with [`PlumeSigner`];
+    /// use it when you don't want to `use` PlumeSigner and the trait in your code.
+    pub fn sign_v1(&self, secret_key: &SecretKey, rng: &mut impl CryptoRngCore) -> PlumeSignature {
+        PlumeSigner::new(secret_key, &self.dst, true).sign_with_rng(rng, &self.msg)
+    }
+    /// Yields the signature with `Some` for `v1specific`. Same as using [`RandomizedSigner`] with [`PlumeSigner`];
+    /// use it when you don't want to `use` PlumeSigner and the trait in your code.
+    pub fn sign_v2(&self, secret_key: &SecretKey, rng: &mut impl CryptoRngCore) -> PlumeSignature {
+        // PlumeSigner::new(secret_key, false).sign_with_rng(rng, msg)
+        PlumeSigner::new(secret_key, &self.dst, false).sign_with_rng(rng, &self.msg)
+    }
+}
 
 /// Struct holding signature data for a PLUME signature.
 ///
@@ -66,7 +89,7 @@ pub const DST: &[u8] = b"QUUX-V01-CS02-with-secp256k1_XMD:SHA-256_SSWU_RO_"; // 
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct PlumeSignature {
     /// The message that was signed.
-    pub message: Vec<u8>,
+    pub message: PlumeMessage,
     /// The public key used to verify the signature.
     pub pk: AffinePoint,
     /// The nullifier.
@@ -142,17 +165,6 @@ impl PlumeSignature {
                     &hashed_to_curve_r,
                 ])))
         }
-    }
-
-    /// Yields the signature with `None` for `v1specific`. Same as using [`RandomizedSigner`] with [`PlumeSigner`];
-    /// use it when you don't want to `use` PlumeSigner and the trait in your code.
-    pub fn sign_v1(secret_key: &SecretKey, msg: &[u8], rng: &mut impl CryptoRngCore) -> Self {
-        PlumeSigner::new(secret_key, true).sign_with_rng(rng, msg)
-    }
-    /// Yields the signature with `Some` for `v1specific`. Same as using [`RandomizedSigner`] with [`PlumeSigner`];
-    /// use it when you don't want to `use` PlumeSigner and the trait in your code.
-    pub fn sign_v2(secret_key: &SecretKey, msg: &[u8], rng: &mut impl CryptoRngCore) -> Self {
-        PlumeSigner::new(secret_key, false).sign_with_rng(rng, msg)
     }
 }
 

@@ -1,6 +1,6 @@
 use super::{
     CryptoRngCore, NonZeroScalar, PlumeSignature, PlumeSignatureV1Fields, ProjectivePoint,
-    SecretKey, DST,
+    SecretKey, PlumeMessage
 };
 use k256::{
     elliptic_curve::{
@@ -25,6 +25,7 @@ use signature::{Error, RandomizedSigner};
 pub struct PlumeSigner<'signing> {
     /// The secret key to use for signing. This is borrowed immutably.
     secret_key: &'signing SecretKey,
+    pub dst: &'signing [u8],
     /// Whether to generate a PlumeSignature V1 (true) or PlumeSignature V2 (false).
     ///
     /// `bool` is fine to use here since the choice affects only the hashing which doesn't
@@ -35,8 +36,8 @@ pub struct PlumeSigner<'signing> {
 impl<'signing> PlumeSigner<'signing> {
     /// Creates a new `PlumeSigner` instance with the given secret key and signature
     /// variant.
-    pub fn new(secret_key: &SecretKey, v1: bool) -> PlumeSigner {
-        PlumeSigner { secret_key, v1 }
+    pub fn new(secret_key: &'signing SecretKey, dst: &'signing [u8], v1: bool) -> PlumeSigner<'signing> {
+        PlumeSigner { secret_key, dst, v1 }
     }
 }
 impl<'signing> RandomizedSigner<PlumeSignature> for PlumeSigner<'signing> {
@@ -55,8 +56,9 @@ impl<'signing> RandomizedSigner<PlumeSignature> for PlumeSigner<'signing> {
 
         // Compute h = htc([m, pk])
         let hashed_to_curve = NonIdentity::new(
-            Secp256k1::hash_from_bytes::<ExpandMsgXmd<Sha256>>(&[msg, &pk_bytes], &[DST])
-                .map_err(|_| Error::new())?,
+            Secp256k1::hash_from_bytes::<ExpandMsgXmd<Sha256>>(
+                &[msg, &pk_bytes], &[self.dst]
+            ).map_err(|_| Error::new())?,
         )
         .expect("something is drammatically wrong if the input hashed to the identity");
 
@@ -95,7 +97,7 @@ impl<'signing> RandomizedSigner<PlumeSignature> for PlumeSigner<'signing> {
             .expect("something is terribly wrong if the nonce is equal to negated product of the secret and the hash");
 
         Ok(PlumeSignature {
-            message: msg.to_owned(),
+            message: PlumeMessage{ dst: self.dst.to_owned(), msg: msg.to_owned() },
             pk: pk.into(),
             nullifier: nullifier.to_point().to_affine(),
             c: c_scalar,

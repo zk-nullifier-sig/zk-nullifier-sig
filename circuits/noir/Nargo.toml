@@ -1,0 +1,12 @@
+[package]
+name = "plume"
+type = "lib"
+authors = ["Distributed Lab"]
+license = "MIT"
+description = "PLUME implementation in Noir."
+compiler_version = ">=0.36.0"
+
+[dependencies]
+bignum = { tag = "main", git = "https://github.com/noir-lang/noir-bignum" }
+noir_bigcurve = { tag = "zkpedro/for_plume", git = "https://github.com/noir-lang/noir_bigcurve" }
+nodash = { tag = "main", git = "https://github.com/olehmisar/nodash" }

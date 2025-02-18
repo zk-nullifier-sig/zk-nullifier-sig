@@ -1,0 +1,44 @@
+{
+    "name": "plume-sig",
+    "version": "2.0.9",
+    "keywords": [
+        "nullifier",
+        "zero-knowledge",
+        "ECDSA",
+        "PLUME"
+    ],
+    "type": "module",
+    "repository": "https://github.com/signorecello/zk-nullifier-sig/",
+    "devDependencies": {
+        "@types/jest": "^29.5.0",
+        "@types/js-sha512": "^0",
+        "@types/node": "^18.11.9",
+        "@types/nodemon": "^1.19.2",
+        "jest": "^29.7.0",
+        "nodemon": "^2.0.20",
+        "prettier": "^3.0.3",
+        "ts-jest": "^29.0.3",
+        "ts-node": "^10.9.1",
+        "typescript": "^5.0.0"
+    },
+    "dependencies": {
+        "@aztec/bb.js": "^0.76.4-devnet-test-rc3",
+        "@noble/curves": "^1.8.1",
+        "@noble/secp256k1": "^1.7.0",
+        "amcl-js": "^3.1.0",
+        "js-sha256": "^0.10.1"
+    },
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "scripts": {
+        "start": "nodemon",
+        "postinstall": "tsc",
+        "build": "tsc",
+        "prettier": "prettier -c . --config ../.prettierrc --ignore-path ../.prettierignore",
+        "prettier:fix": "prettier -w . --config ../.prettierrc --ignore-path ../.prettierignore",
+        "types": "tsc -p tsconfig.json --noEmit",
+        "test": "jest",
+        "test:coverage": "pnpm run test --coverage",
+        "publish": "pnpm run build && pnpm publish"
+    }
+}

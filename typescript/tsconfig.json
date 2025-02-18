@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "skipDefaultLibCheck": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "incremental": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "moduleResolution": "nodenext"
+  },
+  "exclude": ["node_modules", "dist"],
+  "include": ["src"]
+}

@@ -39,3 +39,6 @@ tags
 [._]*.un~
 #______________________
 commit_message_draft.md
+
+node_modules
+dist
